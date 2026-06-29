@@ -482,12 +482,14 @@ class Dual_s(nn.Module):
         def __init__(self,
         rgb_channels: int = 3,
         event_channels: int = 3,
-        out_channels: Sequence[int] = (64, 128, 256, 512)):
+        embed_dims = [64, 128, 256, 512]):
             super().__init__()
 
+            self.rgb_channels = rgb_channels
+            self.event_channels = event_channels
             self.Rgb_backbone = alt_gvt_small()
             self.Event_backbone = alt_gvt_small()
-
+            self.embed_dims = embed_dims
             self.fusion_layers = nn.ModuleList(
                 [
                     nn.Sequential(
@@ -501,9 +503,11 @@ class Dual_s(nn.Module):
                         ),
                         nn.BatchNorm2d(channels),
                         nn.ReLU(inplace=True),
+                    )
+                    for channels in self.embed_dims
                         ]
                     )
-        def forward_features(self,x):
+        def forward(self,x):
 
             rgb = x[:, :self.rgb_channels, :, :]
 
@@ -512,8 +516,8 @@ class Dual_s(nn.Module):
 
             event = x[:, event_start:, :, :]
 
-            rgb_features = self.rgb_backbone(rgb)
-            event_features = self.event_backbone(event)
+            rgb_features = self.Rgb_backbone(rgb)
+            event_features = self.Event_backbone(event)
 
             fused_features: List[torch.Tensor] = []
 
@@ -521,13 +525,14 @@ class Dual_s(nn.Module):
                 event_features,
                 self.fusion_layers,)):
                 fused = torch.cat(
-                    [rgb_feature, event_feature],
+                    [rgb, event],
                     dim=1,
                 )
 
                 fused = fusion_layer(fused)
                 fused_features.append(fused)
-
+            
+            return fused_features
 
 
 
