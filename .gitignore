@@ -1,0 +1,41 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+
+# Conda / virtual environment
+venv/
+env/
+.venv/
+
+# Training results
+work_dirs/
+outputs/
+logs/
+wandb/
+
+# Checkpoints
+*.pth
+*.pt
+*.ckpt
+
+# Dataset
+data/
+
+
+# Temporary visualization results
+show_dir/
+check_train_pipeline/
+
+# Large generated files
+*.pkl
+*.npy
+*.npz
+
+# OS files
+.DS_Store
+Thumbs.db
