@@ -17,11 +17,12 @@ from .resnext import ResNeXt
 from .ssd_vgg import SSDVGG
 from .swin import SwinTransformer
 from .trident_resnet import TridentResNet
+from .twins import  pcpvt_large,pcpvt_base,pcpvt_small,alt_gvt_large,alt_gvt_base,alt_gvt_small,Dual_s
 
 __all__ = [
     'RegNet', 'ResNet', 'ResNetV1d', 'ResNeXt', 'SSDVGG', 'HRNet',
     'MobileNetV2', 'Res2Net', 'HourglassNet', 'DetectoRS_ResNet',
     'DetectoRS_ResNeXt', 'Darknet', 'ResNeSt', 'TridentResNet', 'CSPDarknet',
     'SwinTransformer', 'PyramidVisionTransformer',
-    'PyramidVisionTransformerV2', 'EfficientNet', 'CSPNeXt'
+    'PyramidVisionTransformerV2', 'EfficientNet', 'CSPNeXt','pcpvt_large','pcpvt_base',"pcpvt_small","alt_gvt_large","alt_gvt_base","alt_gvt_small","Dual_s"
 ]

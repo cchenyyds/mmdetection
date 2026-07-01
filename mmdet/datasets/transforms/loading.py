@@ -65,6 +65,95 @@ class LoadImageFromNDArray(LoadImageFromFile):
 
 
 @TRANSFORMS.register_module()
+class Mytransformer(BaseTransform):
+
+    def __init__(
+            self,
+            to_float32: bool = False,
+            color_type: str = 'unchanged',
+            imdecode_backend: str = 'cv2',
+            file_client_args: dict = None,
+            backend_args: dict = None,
+    ) -> None:
+        self.to_float32 = to_float32
+        self.color_type = color_type
+        self.imdecode_backend = imdecode_backend
+        self.backend_args = backend_args
+        #self.event_path = ""
+        #self.rgb_path = ""
+
+        if file_client_args is not None:
+            raise RuntimeError(
+                'The `file_client_args` is deprecated, '
+                'please use `backend_args` instead, please refer to'
+                'https://github.com/open-mmlab/mmdetection/blob/main/configs/_base_/datasets/coco_detection.py'
+                # noqa: E501
+
+            )
+
+    def _read_image(self, results,path):
+        #assert isinstance(results['img_path'], list)
+        from pathlib import Path
+        base_dir = Path(results['img_path']).parent
+        #name = base_dir+'/'+str(results["seq_id"]) + '/' + str(results["seq_id"]) + '/' + path
+        #print("=========results path + img path", name)
+
+        name = (
+                base_dir
+                / str(results["seq_id"])
+                / str(results["seq_id"])
+                / path
+        )
+        name = str(name)
+        #import sss
+        img_bytes = get(name, backend_args=self.backend_args)
+        img = mmcv.imfrombytes(
+            img_bytes, flag=self.color_type, backend=self.imdecode_backend)
+
+        if self.to_float32:
+            img = img.astype(np.float32)
+
+        return img
+
+    def transform(self,
+                  results: dict) ->dict:
+        rgb_path = "RGB/" + results['rgb_path']
+        event_path = "Event/Frames/" + results['event_path']
+        rgb_image = self._read_image(results,rgb_path)
+
+        rgb_mean = np.array(
+            [123.675, 116.28, 103.53],
+            dtype=np.float32
+        ).reshape(1, 1, 3)
+        rgb_std = np.array(
+            [58.395, 57.12, 57.375],
+            dtype=np.float32
+        ).reshape(1, 1, 3)
+
+        rgb_image = (rgb_image - rgb_mean) / rgb_std
+        event_image = self._read_image(results,event_path)
+
+
+        #print("RGB imge range",rgb_image.min(),rgb_image.max())
+        #print("event imge range",event_image.min(), event_image.max())
+
+        #import sss
+        fused_image = np.concatenate([rgb_image,event_image],axis=2)
+        #print("after concat",fused_image.shape)
+        #fused_image = np.stack(fused_image, axis=-1)
+        #print("after stackd",fused_image.shape)
+        #import sss
+        #print("origin______shape",rgb_image.shape,event_image.shape)
+        #print("fused ---------------shape",fused_image.shape)
+
+        #import sss
+        results['img'] = fused_image
+        results['img_shape'] = fused_image.shape[:2]
+        results['ori_shape'] = fused_image.shape[:2]
+
+        return results
+
+@TRANSFORMS.register_module()
 class LoadMultiChannelImageFromFiles(BaseTransform):
     """Load multi-channel images from a list of separate channel files.
 
@@ -136,6 +225,7 @@ class LoadMultiChannelImageFromFiles(BaseTransform):
         img = np.stack(img, axis=-1)
         if self.to_float32:
             img = img.astype(np.float32)
+
 
         results['img'] = img
         results['img_shape'] = img.shape[:2]

@@ -130,8 +130,25 @@ class DetVisualizationHook(Hook):
 
         for data_sample in outputs:
             self._test_index += 1
-
+            #print(data_sample)
+            #print(data_sample.keys())
             img_path = data_sample.img_path
+            #print(data_sample.keys())
+            #print(img_path)
+            #print(data_sample.rgb_path)
+            rgbname = "RGB/" + data_sample.rgb_path
+            #eventname = "Event/Frames/" + data_sample.event_path
+            from pathlib import Path
+            # print(data_info.keys())
+            name = (
+                    Path(img_path).parent
+                    / str(data_sample.seq_id)
+                    / str(data_sample.seq_id)
+                    / rgbname
+            )
+            # print(name)
+            name = str(name)
+            img_path = name
             img_bytes = get(img_path, backend_args=self.backend_args)
             img = mmcv.imfrombytes(img_bytes, channel_order='rgb')
 

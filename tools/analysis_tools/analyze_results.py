@@ -118,6 +118,19 @@ class ResultVisualizer:
 
             # calc save file path
             filename = data_info['img_path']
+            rgbname = "RGB/" + data_info['rgb_path']
+            eventname = "Event/Frames/" + data_info['event_path']
+            from pathlib import Path
+            # print(data_info.keys())
+            name = (
+                    Path(filename).parent
+                    / str(data_info["seq_id"])
+                    / str(data_info["seq_id"])
+                    / rgbname
+            )
+            # print(name)
+            name = str(name)
+            filename = name
             fname, name = osp.splitext(osp.basename(filename))
             save_filename = fname + '_' + str(round(performance, 3)) + name
             out_file = osp.join(out_dir, save_filename)
@@ -240,7 +253,7 @@ class ResultVisualizer:
         prog_bar = ProgressBar(len(results))
         _mAPs = {}
         data_info = {}
-        for i, (result, ) in enumerate(zip(results)):
+        for i, (result,) in enumerate(zip(results)):
 
             # self.dataset[i] should not call directly
             # because there is a risk of mismatch
@@ -333,7 +346,7 @@ def parse_args():
         default=20,
         type=int,
         help='saved Number of the highest topk '
-        'and lowest topk after index sorting')
+             'and lowest topk after index sorting')
     parser.add_argument(
         '--show-score-thr',
         type=float,
@@ -344,11 +357,11 @@ def parse_args():
         nargs='+',
         action=DictAction,
         help='override some settings in the used config, the key-value pair '
-        'in xxx=yyy format will be merged into config file. If the value to '
-        'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
-        'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
-        'Note that the quotation marks are necessary and that no white space '
-        'is allowed.')
+             'in xxx=yyy format will be merged into config file. If the value to '
+             'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
+             'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
+             'Note that the quotation marks are necessary and that no white space '
+             'is allowed.')
     args = parser.parse_args()
     return args
 
@@ -378,7 +391,7 @@ def main():
                                              'RepeatDataset'):
         cfg.test_dataloader.dataset.pipeline = get_loading_pipeline(
             cfg.train_dataloader.dataset.dataset.pipeline)
-    elif cfg.train_dataloader.dataset.type in ('ConcatDataset', ):
+    elif cfg.train_dataloader.dataset.type in ('ConcatDataset',):
         cfg.test_dataloader.dataset.pipeline = get_loading_pipeline(
             cfg.train_dataloader.dataset.datasets[0].pipeline)
     else:
